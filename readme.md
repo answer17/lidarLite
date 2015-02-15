@@ -11,7 +11,7 @@ You will need to install the Wiring library for your board:
 
 * [ODROID C1 wiringPi](https://github.com/hardkernel/wiringPi)
 
-## Connections
+## Pin Connections
 Double-check these with your latest hardware documentation.
 
 Svr is RaspberryPi or ODROID C1
