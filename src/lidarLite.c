@@ -36,8 +36,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
             _dbg = dbg;
             if (_dbg) printf("LidarLite V0.1");
             fd = wiringPiI2CSetup(LIDAR_LITE_ADRS);
-            if (fd != -1) 
+            if (fd != -1) {
                 lidar_status(fd);  // Dummy request to wake up device
+                delay (100);
+                }
             return(fd);
             }        
 
@@ -49,14 +51,14 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
            hiVal = wiringPiI2CWriteReg8(fd, MEASURE_REG, MEASURE_VAL);
            if (_dbg) printf("write res=%d\n", hiVal);
            delay(20);
-
+       
+           // Read second byte and append with first 
+           loVal = _read_byteL(fd, DISTANCE_REG_LO) ;        
+           if (_dbg) printf(" Lo=%d\n", loVal);
+           
            // read first byte 
            hiVal = _read_byte(fd, DISTANCE_REG_HI) ;             
            if (_dbg) printf ("Hi=%d", hiVal);
-       
-           // Read second byte and append with first 
-           loVal = _read_byte(fd, DISTANCE_REG_LO) ;        
-           if (_dbg) printf(" Lo=%d\n", loVal);
            
            return ( (hiVal << 8) + loVal);
     }
@@ -83,16 +85,39 @@ if (status & STAT_EYE) printf(" eye safety \n");
     }    
     
     // Read a byte from I2C register.  Repeat if not ready
-    int _read_byte(int fd, int reg) {
+int _read_byte(int fd, int reg) {
     int i, val;
          while (true) {
             val = wiringPiI2CReadReg8(fd, reg);
+            // Seems to come back as zero if not ready
             if (val != ERROR_READ) 
                 return(val);
             else {
                 delay (20) ;		// ms
+                if (_dbg) printf(".");
                 if (i++ > 50) {
                    // Timeout
+                   if (_dbg) printf("Timeout");
+                   return (ERROR_READ);
+                   }
+              }
+         }   
+    }
+    
+    // Read Lo byte from I2C register.  Repeat if not ready
+    int _read_byteL(int fd, int reg) {
+    int i, val;
+         while (true) {
+            val = wiringPiI2CReadReg8(fd, reg);
+            // Seems to come back as zero if not ready
+            if (val != ERROR_READ && val != 0) 
+                return(val);
+            else {
+                delay (20) ;		// ms
+                if (_dbg) printf(".");
+                if (i++ > 50) {
+                   // Timeout
+                   if (_dbg) printf("Timeout");
                    return (ERROR_READ);
                    }
               }
