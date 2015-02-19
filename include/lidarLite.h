@@ -51,6 +51,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.*/
 
 int lidar_init(bool);
 int lidar_read(int);
-int _read_byte(int, int);
+unsigned char  _read_byte(int, int);
+unsigned char  _read_byteNZ(int, int);
+unsigned char  _read_byte_raw(int, int, bool);
 unsigned char lidar_version(int) ;
 unsigned char lidar_status(int);
